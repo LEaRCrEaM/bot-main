@@ -323,8 +323,8 @@ var page;
 (async () => {
   const pathToExtension = path.join(__dirname, 'extension');
   const browser = await puppeteer.launch({
-    headless: false,
-    executablePath: process.env.NODE_ENV  === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
+    headless: true,
+    executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
     args: [
       `--disable-extensions-except=${pathToExtension}`,
       `--load-extension=${pathToExtension}`,
@@ -332,7 +332,13 @@ var page;
       '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
       '--single-process',
-      '--no-zygote'
+      '--no-zygote',
+      '--disable-gpu',
+      '--disable-software-rasterizer',
+      '--disable-dev-shm-usage',
+      '--remote-debugging-port=9222',
+      '--start-maximized',
+      '--headless'
     ]
   });
   console.log('browser launched');
