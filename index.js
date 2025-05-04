@@ -229,6 +229,7 @@ client.on('messageCreate', async message => {
       });
   };
 });
+console.log("DISCORD_TOKEN exists:", !!process.env.DISCORD_TOKEN);
 
 client.login(process.env.DISCORD_TOKEN).catch(err => {
   console.log(err);
