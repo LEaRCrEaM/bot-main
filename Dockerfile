@@ -2,9 +2,9 @@ FROM ghcr.io/puppeteer/puppeteer:21.3.8
 
 WORKDIR /usr/src/app
 
-# Copy package files and install dependencies
+# Copy package files and ensure the node user has access
 COPY package*.json ./
-RUN npm install
+RUN chown -R node:node /usr/src/app && npm install
 
 # Copy the rest of the app code
 COPY . .
