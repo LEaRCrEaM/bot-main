@@ -338,7 +338,19 @@ var page;
       '--disable-dev-shm-usage',
       '--remote-debugging-port=9222',
       '--start-maximized',
-      '--headless'
+      '--headless',
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--disable-gpu',
+      '--no-first-run',
+      '--no-zygote',
+      '--disable-infobars',
+      '--start-maximized',
+      '--window-size=1920,1080',
+      '--enable-webgl',
+      '--ignore-gpu-blacklist'
     ]
   });
   console.log('browser launched');
