@@ -230,7 +230,9 @@ client.on('messageCreate', async message => {
   };
 });
 
-client.login(process.env.DISCORD_TOKEN);
+client.login(process.env.DISCORD_TOKEN).catch(err => {
+  console.log(err);
+});
 
 const puppeteer = require('puppeteer');
 //const path = require('path');
