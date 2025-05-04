@@ -323,7 +323,7 @@ var page;
   const pathToExtension = path.join(__dirname, 'extension');
   const browser = await puppeteer.launch({
     headless: 'new',
-    executablePath: process.env.NODE_ENV  === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
+    executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
     args: [
       `--disable-extensions-except=${pathToExtension}`,
       `--load-extension=${pathToExtension}`,
@@ -335,8 +335,9 @@ var page;
     ]
   });
   const pages = await browser.pages();
-  page = pages[0];
-  if (!page) {
+  if (pages.length > 0 && pages[0].url() !== 'about:blank') {
+    page = pages[0];
+  } else {
     page = await browser.newPage();
   };
   page.setDefaultNavigationTimeout(0);
