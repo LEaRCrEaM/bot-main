@@ -1,15 +1,11 @@
 FROM ghcr.io/puppeteer/puppeteer:21.3.8
 
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+
 WORKDIR /usr/src/app
 
-# Copy package files and ensure the node user has access
 COPY package*.json ./
-RUN chown -R node:node /usr/src/app && npm install
-
-# Copy the rest of the app code
+RUN npm ci
 COPY . .
-
-# Set environment variables for Puppeteer and Node.js
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-
-CMD ["node", "index.js"]
+CMD [ "node", "index.js" ]

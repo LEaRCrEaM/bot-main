@@ -229,11 +229,8 @@ client.on('messageCreate', async message => {
       });
   };
 });
-console.log("DISCORD_TOKEN exists:", !!process.env.DISCORD_TOKEN);
-console.log("Attempting login...");
-client.login(process.env.DISCORD_TOKEN)
-    .then(() => console.log("Login successful"))
-    .catch(err => console.error("Discord login failed:", err));
+
+client.login(process.env.DISCORD_TOKEN);
 
 const puppeteer = require('puppeteer');
 //const path = require('path');
