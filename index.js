@@ -231,7 +231,7 @@ client.on('messageCreate', async message => {
 });
 
 client.login(process.env.DISCORD_TOKEN);
-
+console.log('logged in client');
 const puppeteer = require('puppeteer');
 //const path = require('path');
 
@@ -318,7 +318,7 @@ async function savePlayer(array) {
     console.log('Error occurred while communicating with the server.');
   };
 };
-
+console.log('functions defined');
 var page;
 (async () => {
   const pathToExtension = path.join(__dirname, 'extension');
@@ -335,11 +335,13 @@ var page;
       '--no-zygote'
     ]
   });
+  console.log('browser launched');
   const pages = await browser.pages();
   //page = pages[0];
   if (!page) {
     page = await browser.newPage();
   };
+  console.log('page defined');
   page.setDefaultNavigationTimeout(0);
   await page.goto('https://tankionline.com/play/', { waitUntil: 'domcontentloaded', timeout: 0 });
   await page.waitForSelector('.StartScreenComponentStyle-text');
@@ -363,6 +365,7 @@ var page;
   await page.type('#username', 'skiil3d');
   await page.type('#password', 'shamshameero');
   await page.click('.EntranceComponentStyle-buttonActive');
+  console.log('logged in skiil3d');
   await page.waitForSelector('.FooterComponentStyle-containerMenu.FooterComponentStyle-friendButton');
   await page.click('.FooterComponentStyle-containerMenu.FooterComponentStyle-friendButton');
   await wait(500);
