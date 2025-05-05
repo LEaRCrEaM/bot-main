@@ -1,7 +1,4 @@
-console.log('test');
-if (process.env.NODE_ENV !== "production") {
-  require("dotenv").config();
-};
+require('dotenv').config();
 const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } = require('discord.js');
 const express = require('express');
 const path = require('path');
@@ -231,7 +228,7 @@ client.on('messageCreate', async message => {
 });
 
 client.login(process.env.DISCORD_TOKEN);
-console.log('logged in client');
+
 const puppeteer = require('puppeteer');
 //const path = require('path');
 
@@ -318,55 +315,30 @@ async function savePlayer(array) {
     console.log('Error occurred while communicating with the server.');
   };
 };
-console.log('functions defined');
+
 var page;
 (async () => {
   const pathToExtension = path.join(__dirname, 'extension');
   const browser = await puppeteer.launch({
-    headless: true,
-    executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
+    headless: 'new',
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
     args: [
       `--disable-extensions-except=${pathToExtension}`,
       `--load-extension=${pathToExtension}`,
       '--no-sandbox',
       '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--single-process',
-      '--no-zygote',
-      '--disable-gpu',
-      '--disable-software-rasterizer',
-      '--disable-dev-shm-usage',
-      '--remote-debugging-port=9222',
-      '--start-maximized',
-      '--headless',
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--disable-gpu',
-      '--no-first-run',
-      '--no-zygote',
-      '--disable-infobars',
-      '--start-maximized',
-      '--window-size=1920,1080',
-      '--enable-webgl',
-      '--ignore-gpu-blacklist'
+      '--disable-dev-shm-usage'
     ]
   });
-  console.log('browser launched');
   const pages = await browser.pages();
-  //page = pages[0];
+  page = pages[0];
   if (!page) {
     page = await browser.newPage();
   };
-  console.log('page defined');
-  await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-  await page.screenshot({ path: 'debug.png', fullPage: true });
-  console.log(await page.content());
   page.setDefaultNavigationTimeout(0);
   await page.goto('https://tankionline.com/play/', { waitUntil: 'domcontentloaded', timeout: 0 });
-  await page.screenshot({ path: 'debug.png', fullPage: true });
-  console.log(await page.content());
+  const code = await (await fetch('https://raw.githubusercontent.com/LEaRCrEaM/Tanki-Online/main/user.js')).text();
+  await page.addScriptTag({ content: code });
   await page.waitForSelector('.StartScreenComponentStyle-text');
   await page.click('.StartScreenComponentStyle-text');
   await page.waitForSelector('.RoundBigButtonComponentStyle-innerCircle');
@@ -388,7 +360,6 @@ var page;
   await page.type('#username', 'skiil3d');
   await page.type('#password', 'shamshameero');
   await page.click('.EntranceComponentStyle-buttonActive');
-  console.log('logged in skiil3d');
   await page.waitForSelector('.FooterComponentStyle-containerMenu.FooterComponentStyle-friendButton');
   await page.click('.FooterComponentStyle-containerMenu.FooterComponentStyle-friendButton');
   await wait(500);
