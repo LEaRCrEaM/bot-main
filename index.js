@@ -363,6 +363,11 @@ client.on('interactionCreate', async interaction => {
 });
 
 client.on('messageCreate', async message => {
+  try {
+    console.log(message.content);
+  } catch (e) {
+    console.log(e);
+  };
   if (message.content === '!ping') {
     message.reply('🏓 Pong!');
   };
