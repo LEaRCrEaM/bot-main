@@ -512,7 +512,7 @@ var page;
 (async () => {
   const pathToExtension = path.join(__dirname, 'extension');
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: 'new',
     executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
     args: [
       `--disable-extensions-except=${pathToExtension}`,
