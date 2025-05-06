@@ -19,7 +19,7 @@ const commands = [
         .setRequired(true)
     ),
 
-    new SlashCommandBuilder()
+  new SlashCommandBuilder()
     .setName('clans')
     .setDescription('Get old clan info by username')
     .addStringOption(option =>
@@ -28,7 +28,7 @@ const commands = [
         .setRequired(true)
     ),
 
-    new SlashCommandBuilder()
+  new SlashCommandBuilder()
     .setName('whois')
     .setDescription('Get old username info by username')
     .addStringOption(option =>
@@ -95,11 +95,11 @@ client.on('interactionCreate', async interaction => {
   if (!interaction.isChatInputCommand()) return;
   if (interaction.commandName === 'check') {
     const name = interaction.options.getString('username');
-    for (let i = 0; i < 5; i++) {
-      setTimeout(() => {
-        SubscribeTo(name);
-      }, i * 1000);
-    };
+    //for (let i = 0; i < 5; i++) {
+    //setTimeout(() => {
+    SubscribeTo(name);
+    //}, i * 1000);
+    //};
     //Subscribeto2(name);
     await interaction.deferReply();
     let attempts = 0;
@@ -122,8 +122,18 @@ client.on('interactionCreate', async interaction => {
       const isOnline = foundData.onlineStatus?.rk1_1;
       const serverNumber = foundData.onlineStatus?.sk1_1;
       const seconds = foundData.onlineStatus?.tk1_1?.m1_1;
-      const hours = (seconds / 3600).toFixed(1);
-      const lastOnline = `${hours} Hours Ago | ` + new Date(Date.now() - seconds * 1000).toLocaleTimeString('en-US', { timeZone: 'America/New_York' }) + ' (EST)';
+
+      function formatDuration(seconds) {
+        if (seconds < 60) return `${Math.round(seconds)} seconds ago`;
+        if (seconds < 3600) return `${Math.round(seconds / 60)} minutes ago`;
+        if (seconds < 86400) return `${Math.round(seconds / 3600)} hours ago`;
+        if (seconds < 31536000) return `${Math.round(seconds / 86400)} days ago`;
+        return `${Math.round(seconds / 31536000)} years ago`;
+      };
+      const date = new Date(Date.now() - seconds * 1000);
+      const dateStr = date.toLocaleDateString('en-US', { timeZone: 'America/New_York' });
+      const timeStr = date.toLocaleTimeString('en-US', { timeZone: 'America/New_York' });
+      const lastOnline = `${formatDuration(seconds)} | ${dateStr} ${timeStr} (EST)`;
       var savedData;
       await fetch('https://sapphire-burnt-cut.glitch.me/api/viewMessages')
         .then(async r => await r.json())
@@ -159,7 +169,7 @@ client.on('interactionCreate', async interaction => {
             embed.addFields({ name: key, value: `${value ? `${JSON.stringify(Object.values(Object.values(value)[1])[2]).replaceAll('"', '')}\n${battleIdToHash(value.string.match(/battleId = \w+/)[0].split(' ')[2])}` : `No Battle`}`, inline: false });
             break;
           default:
-            //embed.addFields({ name: key, value: JSON.stringify(value), inline: false });
+          //embed.addFields({ name: key, value: JSON.stringify(value), inline: false });
         };
       });
       if (hidden.includes(foundData.uid)) {
@@ -178,11 +188,11 @@ client.on('interactionCreate', async interaction => {
   };
   if (interaction.commandName === 'whois') {
     const name = interaction.options.getString('username');
-    for (let i = 0; i < 5; i++) {
-      setTimeout(() => {
-        SubscribeTo(name);
-      }, i * 1000);
-    };
+    //for (let i = 0; i < 5; i++) {
+    //setTimeout(() => {
+    SubscribeTo(name);
+    //}, i * 1000);
+    //};
     //Subscribeto2(name);
     await interaction.deferReply();
     let attempts = 0;
@@ -242,7 +252,7 @@ client.on('interactionCreate', async interaction => {
             //embed.addFields({ name: key, value: `${value ? `${JSON.stringify(Object.values(Object.values(value)[1])[2]).replaceAll('"', '')}\n${battleIdToHash(value.string.match(/battleId = \w+/)[0].split(' ')[2])}` : `No Battle`}`, inline: false });
             break;
           default:
-            //embed.addFields({ name: key, value: JSON.stringify(value), inline: false });
+          //embed.addFields({ name: key, value: JSON.stringify(value), inline: false });
         };
       });
       if (hidden.includes(foundData.uid)) {
@@ -261,11 +271,11 @@ client.on('interactionCreate', async interaction => {
   };
   if (interaction.commandName === 'clans') {
     const name = interaction.options.getString('username');
-    for (let i = 0; i < 5; i++) {
-      setTimeout(() => {
-        SubscribeTo(name);
-      }, i * 1000);
-    };
+    //for (let i = 0; i < 5; i++) {
+    //setTimeout(() => {
+    SubscribeTo(name);
+    //}, i * 1000);
+    //};
     //Subscribeto2(name);
     await interaction.deferReply();
     let attempts = 0;
@@ -325,7 +335,7 @@ client.on('interactionCreate', async interaction => {
             //embed.addFields({ name: key, value: `${value ? `${JSON.stringify(Object.values(Object.values(value)[1])[2]).replaceAll('"', '')}\n${battleIdToHash(value.string.match(/battleId = \w+/)[0].split(' ')[2])}` : `No Battle`}`, inline: false });
             break;
           default:
-            //embed.addFields({ name: key, value: JSON.stringify(value), inline: false });
+          //embed.addFields({ name: key, value: JSON.stringify(value), inline: false });
         };
       });
       if (hidden.includes(foundData.uid)) {
@@ -544,11 +554,11 @@ var page;
   await page.type('input[placeholder="Enter a nickname"]', 'asd');
   await page.waitForSelector('.FriendListComponentStyle-buttonFoundAdd');
   await page.click('.FriendListComponentStyle-buttonFoundAdd');
-  await wait(500);
+  /*await wait(500);
   await page.waitForSelector('.BreadcrumbsComponentStyle-backButton');
   await page.click('.BreadcrumbsComponentStyle-backButton');
   await page.waitForSelector('.MainScreenComponentStyle-playButtonContainer');
-  await page.click('.MainScreenComponentStyle-playButtonContainer');
+  await page.click('.MainScreenComponentStyle-playButtonContainer');*/
 
   /*await wait(500);
   await page.evaluate(async () => {
