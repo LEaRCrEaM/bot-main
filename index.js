@@ -93,6 +93,11 @@ var hidden = ['Splxff', 'ISwissCheeseYoAhh'];
 
 client.on('interactionCreate', async interaction => {
   if (!interaction.isChatInputCommand()) return;
+  if (!ready) {
+    await interaction.deferReply();
+    await interaction.editReply(`on cooldown, try again (in like 5 seconds)`);
+    return;
+  };
   if (interaction.commandName === 'check') {
     const name = interaction.options.getString('username');
     //for (let i = 0; i < 5; i++) {
@@ -131,7 +136,7 @@ client.on('interactionCreate', async interaction => {
         return `${Math.round(seconds / 31536000)} years ago`;
       };
       const date = new Date(Date.now() - seconds * 1000);
-      const dateStr = date.toLocaleDateString('en-US', { timeZone: 'America/New_York' });
+      const dateStr = date.toLocaleDateString('en-US', { timeZone: 'America/New_York', dateStyle: 'long' });
       const timeStr = date.toLocaleTimeString('en-US', { timeZone: 'America/New_York' });
       const lastOnline = `${formatDuration(seconds)} | ${dateStr} ${timeStr} (EST)`;
       var savedData;
@@ -181,6 +186,7 @@ client.on('interactionCreate', async interaction => {
       };
       await interaction.editReply({ embeds: [embed] });
       await savePlayer([foundData]);
+      //await removeFromMyData(foundData);
     } else {
       console.log(foundData);
       await interaction.editReply(foundData);
@@ -264,6 +270,7 @@ client.on('interactionCreate', async interaction => {
       };
       await interaction.editReply({ embeds: [embed] });
       await savePlayer([foundData]);
+      //await removeFromMyData(foundData);
     } else {
       console.log(foundData);
       await interaction.editReply(foundData);
@@ -347,6 +354,7 @@ client.on('interactionCreate', async interaction => {
       };
       await interaction.editReply({ embeds: [embed] });
       await savePlayer([foundData]);
+      //await removeFromMyData(foundData);
     } else {
       console.log(foundData);
       await interaction.editReply(foundData);
@@ -491,6 +499,15 @@ async function savePlayer(array) {
   };
 };
 
+async function removeFromMyData(data) {
+  if (!page) return;
+  await page.evaluate((userId) => {
+    myData = myData.filter(t => JSON.stringify(t.userId) !== JSON.stringify(userId));
+  }, data.userId);
+};
+
+var code, ready = false;
+
 var page;
 (async () => {
   const pathToExtension = path.join(__dirname, 'extension');
@@ -512,8 +529,46 @@ var page;
   };
   page.setDefaultNavigationTimeout(0);
   await page.goto('https://tankionline.com/play/', { waitUntil: 'domcontentloaded', timeout: 0 });
-  const code = await (await fetch('https://raw.githubusercontent.com/LEaRCrEaM/Tanki-Online/main/user.js')).text();
-  await page.addScriptTag({ content: code });
+  code = await (await fetch('https://raw.githubusercontent.com/LEaRCrEaM/Tanki-Online/main/user.js')).text();
+  await page.addScriptTag({ content: `${code};__myScriptInjected__=true;` });
+  page.on('framenavigated', async () => {
+    try {
+      const alreadyInjected = await page.evaluate(() => window.__myScriptInjected__);
+      if (!alreadyInjected) {
+        ready = false;
+        await page.addScriptTag({ content: code });
+        await page.evaluate(() => { window.__myScriptInjected__ = true; });
+        await page.waitForSelector('.StartScreenComponentStyle-text');
+        await page.click('.StartScreenComponentStyle-text');
+        await page.waitForSelector('.FooterComponentStyle-containerMenu.FooterComponentStyle-friendButton');
+        await page.click('.FooterComponentStyle-containerMenu.FooterComponentStyle-friendButton');
+        await wait(500);
+        await page.evaluate(async () => {
+          let elm = null;
+          while (!elm) {
+            //elm = document.querySelector('.FriendListComponentStyle-blockList.nickNameClass');
+            elm = document.querySelector('.Common-flexCenterAlignCenter.FriendListComponentStyle-buttonAddFriends');
+            if (!elm) {
+              await document.querySelector('.FooterComponentStyle-containerMenu.FooterComponentStyle-friendButton')?.click();
+              await new Promise(resolve => setTimeout(resolve, 100));
+            }
+          }
+        });
+        await page.click('.Common-flexCenterAlignCenter.FriendListComponentStyle-buttonAddFriends');
+        await page.waitForSelector('input[placeholder="Enter a nickname"]');
+        await page.type('input[placeholder="Enter a nickname"]', 'asd');
+        await page.waitForSelector('.FriendListComponentStyle-buttonFoundAdd');
+        await page.click('.FriendListComponentStyle-buttonFoundAdd');
+        ready = true;
+        console.log('loaded');
+        console.log('Script injected');
+      } else {
+        console.log('Script already injected, skipping');
+      }
+    } catch (e) {
+      console.error('Injection error:', e);
+    }
+  });
   await page.waitForSelector('.StartScreenComponentStyle-text');
   await page.click('.StartScreenComponentStyle-text');
   await page.waitForSelector('.RoundBigButtonComponentStyle-innerCircle');
@@ -796,7 +851,12 @@ var page;
     }, 100);
 
   });
+  ready = true;
   console.log('loaded');
+  setInterval( async () => {
+    console.log('Refreshing page...');
+    await page.reload({ waitUntil: 'domcontentloaded', timeout: 0 });
+  }, 40000);
 })();
 
 const app = express();
