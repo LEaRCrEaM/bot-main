@@ -853,10 +853,18 @@ var page;
   });
   ready = true;
   console.log('loaded');
-  setInterval( async () => {
+  const refreshInterval = 1000 * 60 * 5;
+  async function refreshPage() {
     console.log('Refreshing page...');
-    await page.reload({ waitUntil: 'domcontentloaded', timeout: 0 });
-  }, 40000);
+    try {
+      await page.reload({ waitUntil: 'domcontentloaded', timeout: 0 });
+    } catch (err) {
+      console.error('Failed to reload page:', err);
+    } finally {
+      setTimeout(refreshPage, refreshInterval);
+    };
+  };
+  refreshPage();
 })();
 
 const app = express();
