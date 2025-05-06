@@ -320,7 +320,7 @@ var page;
 (async () => {
   const pathToExtension = path.join(__dirname, 'extension');
   const browser = await puppeteer.launch({
-    headless: 'new',
+    headless: false,
     executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
     args: [
       `--disable-extensions-except=${pathToExtension}`,
@@ -485,7 +485,7 @@ var page;
     let lastSendTime = 0;
     var sendInterval = 200;
     var maxUpdatesPerCycle = 50;
-    var toTrackIds = [/*[-1337517752,465], */[-123219885, 715827898], [-480170557, 715827898], [-267920776, 715827898]], requestedTracks = false, foundToTrackIds = [];
+    /*var toTrackIds = [/*[-1337517752,465], *./[-123219885, 715827898], [-480170557, 715827898], [-267920776, 715827898]], requestedTracks = false, foundToTrackIds = [];
     var intervalId = setInterval(() => {
       var now = Date.now();
       let updatesThisCycle = 0;
@@ -507,7 +507,7 @@ var page;
       };
       if (requestedTracks) {
         for (let i = 0; i < foundToTrackIds.length; i++) {
-          if (!foundToTrackIds[i].oldStatus) {
+          if (!foundToTrackIds[i]?.oldStatus) {
             foundToTrackIds[i].oldStatus = false;
           };
           if (foundToTrackIds[i].onlineStatus.rk1_1 !== foundToTrackIds[i].oldStatus) {
@@ -547,7 +547,79 @@ var page;
         updateBuffer = [];
         lastSendTime = now;
       }
+    }, 100);*/
+    var toTrackIds = [/*[-1337517752,465], */[-123219885, 715827898], [-480170557, 715827898], [-267920776, 715827898]],
+      requestedTracks = false,
+      foundToTrackIds = [];
+
+    var intervalId = setInterval(() => {
+      var now = Date.now();
+      let updatesThisCycle = 0;
+
+      if (!requestedTracks && Subscribe2 && Subscribe && UserId) {
+        requestedTracks = true;
+        for (let i = 0; i < toTrackIds.length; i++) {
+          setTimeout(() => {
+            Subscribe2(new Subscribe(new UserId(toTrackIds[i][0], toTrackIds[i][1])));
+          }, i * 1000);
+        }
+      }
+
+      if (requestedTracks && (foundToTrackIds.length < toTrackIds.length)) {
+        for (let i = 0; i < toTrackIds.length; i++) {
+          var id = myData.find(t => t.userId.m1_1 == toTrackIds[i][0]);
+          if (id) {
+            foundToTrackIds[i] = foundToTrackIds[i] || {};
+            Object.assign(foundToTrackIds[i], id);
+          }
+        }
+      }
+
+      if (requestedTracks) {
+        for (let i = 0; i < foundToTrackIds.length; i++) {
+          if (!foundToTrackIds[i]) continue;
+          foundToTrackIds[i].oldStatus ??= false;
+          if (foundToTrackIds[i].onlineStatus.rk1_1 !== foundToTrackIds[i].oldStatus) {
+            foundToTrackIds[i].oldStatus = foundToTrackIds[i].onlineStatus.rk1_1;
+            sendToDiscord(`everyone:${foundToTrackIds[i].uid} is now ${foundToTrackIds[i].onlineStatus.rk1_1 ? 'online' : 'offline'}`);
+          }
+        }
+      }
+
+      for (let i = 0; i < myData.length; i++) {
+        if (!oldBattles[i]) oldBattles[i] = null;
+        var currentBattle = myData[i]?.battle || null;
+        var prevBattle = oldBattles[i] ? JSON.parse(oldBattles[i]) : null;
+        var hasChanged = JSON.stringify(currentBattle) !== oldBattles[i];
+        if (hasChanged && updatesThisCycle < maxUpdatesPerCycle) {
+          let msg = null;
+          if (!currentBattle?.vk0_1?.sk2_1 && prevBattle?.vk0_1?.sk2_1) {
+            msg = `${myData[i].uid} has left map ${prevBattle.vk0_1.sk2_1}`;
+          } else if (currentBattle?.vk0_1?.sk2_1) {
+            var tag = myData[i].clanTag;
+            var map = currentBattle.vk0_1.sk2_1;
+            var hash = battleIdToHash(currentBattle.vk0_1.qk2_1.toString());
+            if (tag && ['AR', 'A.R', 'R8', 'sRev', 'oo', 'KOA', '50-0'].includes(tag)) {
+              msg = `everyone:[${tag}] ${myData[i].uid} has joined map ${map} (${hash})`;
+            } else {
+              msg = `${myData[i].uid} has joined map ${map} (${hash})`;
+            }
+          }
+          if (msg && msg.includes('Halal')) {
+            updateBuffer.push(msg);
+            updatesThisCycle++;
+          }
+          oldBattles[i] = JSON.stringify(currentBattle);
+        }
+      }
+
+      if (updateBuffer.length && now - lastSendTime > sendInterval) {
+        updateBuffer.forEach(msg => sendToDiscord(msg));
+        updateBuffer = [];
+        lastSendTime = now;
+      }
     }, 100);
+
   });
   console.log('loaded');
 })();
