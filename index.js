@@ -12,30 +12,29 @@ const client = new Client({
 const commands = [
   new SlashCommandBuilder()
     .setName('check')
-    .setDescription('Get info by username')
+    .setDescription('Get online status by username')
     .addStringOption(option =>
       option.setName('username')
         .setDescription('The username to search')
         .setRequired(true)
     ),
 
-  new SlashCommandBuilder()
-    .setName('getinfo')
-    .setDescription('Advanced get info query')
+    new SlashCommandBuilder()
+    .setName('clans')
+    .setDescription('Get old clan info by username')
     .addStringOption(option =>
-      option.setName('name')
-        .setDescription('Name')
-        .setRequired(false)
-    )
+      option.setName('username')
+        .setDescription('The username to search')
+        .setRequired(true)
+    ),
+
+    new SlashCommandBuilder()
+    .setName('whois')
+    .setDescription('Get old username info by username')
     .addStringOption(option =>
-      option.setName('key')
-        .setDescription('Key')
-        .setRequired(false)
-    )
-    .addStringOption(option =>
-      option.setName('subkey')
-        .setDescription('Subkey')
-        .setRequired(false)
+      option.setName('username')
+        .setDescription('The username to search')
+        .setRequired(true)
     )
 ].map(command => command.toJSON());
 
@@ -141,13 +140,13 @@ client.on('interactionCreate', async interaction => {
             embed.addFields({ name: 'Online Status', value: `Online: ${isOnline}\nServer: ${serverNumber}\nLast Online: ${isOnline ? 'Now' : lastOnline}`, inline: false });
             break;
           case 'uid':
-            embed.addFields({ name: 'Username(s)', value: `${value}${foundInSavedData?.uid ? `\nPreviously: ${foundInSavedData?.uid}` : ``}`, inline: false });
+            //embed.addFields({ name: 'Username(s)', value: `${value}${foundInSavedData?.uid ? `\nPreviously: ${foundInSavedData?.uid}` : ``}`, inline: false });
             break;
           case 'clanTag':
             if (value !== null) {
-              embed.addFields({ name: key, value: `[${value}]${foundInSavedData?.clanTag ? `\nPreviously: [${foundInSavedData?.clanTag.split(', ').join('], [')}]` : ``}`, inline: false });
+              //embed.addFields({ name: key, value: `[${value}]${foundInSavedData?.clanTag ? `\nPreviously: [${foundInSavedData?.clanTag.split(', ').join('], [')}]` : ``}`, inline: false });
             } else {
-              embed.addFields({ name: key, value: `No Clan${foundInSavedData?.clanTag ? `\nPreviously: [${foundInSavedData?.clanTag.split(', ').join('], [')}]` : ``}`, inline: false });
+              //embed.addFields({ name: key, value: `No Clan${foundInSavedData?.clanTag ? `\nPreviously: [${foundInSavedData?.clanTag.split(', ').join('], [')}]` : ``}`, inline: false });
             };
             break;
           case 'oldStatus':
@@ -160,7 +159,7 @@ client.on('interactionCreate', async interaction => {
             embed.addFields({ name: key, value: `${value ? `${JSON.stringify(Object.values(Object.values(value)[1])[2]).replaceAll('"', '')}\n${battleIdToHash(value.string.match(/battleId = \w+/)[0].split(' ')[2])}` : `No Battle`}`, inline: false });
             break;
           default:
-            embed.addFields({ name: key, value: JSON.stringify(value), inline: false });
+            //embed.addFields({ name: key, value: JSON.stringify(value), inline: false });
         };
       });
       if (hidden.includes(foundData.uid)) {
@@ -176,7 +175,173 @@ client.on('interactionCreate', async interaction => {
       console.log(foundData);
       await interaction.editReply(foundData);
     }
-  }
+  };
+  if (interaction.commandName === 'whois') {
+    const name = interaction.options.getString('username');
+    for (let i = 0; i < 5; i++) {
+      setTimeout(() => {
+        SubscribeTo(name);
+      }, i * 1000);
+    };
+    //Subscribeto2(name);
+    await interaction.deferReply();
+    let attempts = 0;
+    let maxAttempts = 30;
+    let interval = 1000;
+    let foundData = null;
+    while (attempts < maxAttempts) {
+      const data = await getMyData();
+      const match = data.find(t => t.uid.toLowerCase() === name.toLowerCase());
+      if (match) {
+        foundData = match;
+        break;
+      }
+      await new Promise(res => setTimeout(res, interval));
+      attempts++;
+    };
+    var data = await getMyData();
+    foundData = data.find(t => t.uid.toLowerCase() === name.toLowerCase()) || 'username not found';
+    if ((typeof foundData == 'object') && foundData?.onlineStatus) {
+      const isOnline = foundData.onlineStatus?.rk1_1;
+      const serverNumber = foundData.onlineStatus?.sk1_1;
+      const seconds = foundData.onlineStatus?.tk1_1?.m1_1;
+      const hours = (seconds / 3600).toFixed(1);
+      const lastOnline = `${hours} Hours Ago | ` + new Date(Date.now() - seconds * 1000).toLocaleTimeString('en-US', { timeZone: 'America/New_York' }) + ' (EST)';
+      var savedData;
+      await fetch('https://sapphire-burnt-cut.glitch.me/api/viewMessages')
+        .then(async r => await r.json())
+        .then(async d => savedData = await d)
+        .catch(async err => await console.error('Fetch error:', err));
+      var foundInSavedData = await savedData.find(t => JSON.stringify(t.userId) == JSON.stringify(foundData.userId)) || null;
+      var embed = new EmbedBuilder()
+        .setTitle(`✅ ${foundData.uid} - Found`)
+        .setColor(isOnline ? 0x00ff00 : 0xff0000)
+        .setThumbnail(ranks[foundData.rank]);
+      Object.entries(foundData).forEach(([key, value]) => {
+        switch (key) {
+          case 'onlineStatus':
+            //embed.addFields({ name: 'Online Status', value: `Online: ${isOnline}\nServer: ${serverNumber}\nLast Online: ${isOnline ? 'Now' : lastOnline}`, inline: false });
+            break;
+          case 'uid':
+            embed.addFields({ name: 'Username(s)', value: `${value}${foundInSavedData?.uid ? `\nPreviously: ${foundInSavedData?.uid}` : ``}`, inline: false });
+            break;
+          case 'clanTag':
+            if (value !== null) {
+              //embed.addFields({ name: key, value: `[${value}]${foundInSavedData?.clanTag ? `\nPreviously: [${foundInSavedData?.clanTag.split(', ').join('], [')}]` : ``}`, inline: false });
+            } else {
+              //embed.addFields({ name: key, value: `No Clan${foundInSavedData?.clanTag ? `\nPreviously: [${foundInSavedData?.clanTag.split(', ').join('], [')}]` : ``}`, inline: false });
+            };
+            break;
+          case 'oldStatus':
+            break;
+          case 'userId':
+            break;
+          case 'rank':
+            break;
+          case 'battle':
+            //embed.addFields({ name: key, value: `${value ? `${JSON.stringify(Object.values(Object.values(value)[1])[2]).replaceAll('"', '')}\n${battleIdToHash(value.string.match(/battleId = \w+/)[0].split(' ')[2])}` : `No Battle`}`, inline: false });
+            break;
+          default:
+            //embed.addFields({ name: key, value: JSON.stringify(value), inline: false });
+        };
+      });
+      if (hidden.includes(foundData.uid)) {
+        embed = new EmbedBuilder()
+          .setTitle(`❌ ${foundData.uid} - Hidden`)
+          .setThumbnail(ranks[foundData.rank])
+          .setColor("#ff0000")
+          .setTimestamp();
+      };
+      await interaction.editReply({ embeds: [embed] });
+      await savePlayer([foundData]);
+    } else {
+      console.log(foundData);
+      await interaction.editReply(foundData);
+    }
+  };
+  if (interaction.commandName === 'clans') {
+    const name = interaction.options.getString('username');
+    for (let i = 0; i < 5; i++) {
+      setTimeout(() => {
+        SubscribeTo(name);
+      }, i * 1000);
+    };
+    //Subscribeto2(name);
+    await interaction.deferReply();
+    let attempts = 0;
+    let maxAttempts = 30;
+    let interval = 1000;
+    let foundData = null;
+    while (attempts < maxAttempts) {
+      const data = await getMyData();
+      const match = data.find(t => t.uid.toLowerCase() === name.toLowerCase());
+      if (match) {
+        foundData = match;
+        break;
+      }
+      await new Promise(res => setTimeout(res, interval));
+      attempts++;
+    };
+    var data = await getMyData();
+    foundData = data.find(t => t.uid.toLowerCase() === name.toLowerCase()) || 'username not found';
+    if ((typeof foundData == 'object') && foundData?.onlineStatus) {
+      const isOnline = foundData.onlineStatus?.rk1_1;
+      const serverNumber = foundData.onlineStatus?.sk1_1;
+      const seconds = foundData.onlineStatus?.tk1_1?.m1_1;
+      const hours = (seconds / 3600).toFixed(1);
+      const lastOnline = `${hours} Hours Ago | ` + new Date(Date.now() - seconds * 1000).toLocaleTimeString('en-US', { timeZone: 'America/New_York' }) + ' (EST)';
+      var savedData;
+      await fetch('https://sapphire-burnt-cut.glitch.me/api/viewMessages')
+        .then(async r => await r.json())
+        .then(async d => savedData = await d)
+        .catch(async err => await console.error('Fetch error:', err));
+      var foundInSavedData = await savedData.find(t => JSON.stringify(t.userId) == JSON.stringify(foundData.userId)) || null;
+      var embed = new EmbedBuilder()
+        .setTitle(`✅ ${foundData.uid} - Found`)
+        .setColor(isOnline ? 0x00ff00 : 0xff0000)
+        .setThumbnail(ranks[foundData.rank]);
+      Object.entries(foundData).forEach(([key, value]) => {
+        switch (key) {
+          case 'onlineStatus':
+            //embed.addFields({ name: 'Online Status', value: `Online: ${isOnline}\nServer: ${serverNumber}\nLast Online: ${isOnline ? 'Now' : lastOnline}`, inline: false });
+            break;
+          case 'uid':
+            //embed.addFields({ name: 'Username(s)', value: `${value}${foundInSavedData?.uid ? `\nPreviously: ${foundInSavedData?.uid}` : ``}`, inline: false });
+            break;
+          case 'clanTag':
+            if (value !== null) {
+              embed.addFields({ name: key, value: `[${value}]${foundInSavedData?.clanTag ? `\nPreviously: [${foundInSavedData?.clanTag.split(', ').join('], [')}]` : ``}`, inline: false });
+            } else {
+              embed.addFields({ name: key, value: `No Clan${foundInSavedData?.clanTag ? `\nPreviously: [${foundInSavedData?.clanTag.split(', ').join('], [')}]` : ``}`, inline: false });
+            };
+            break;
+          case 'oldStatus':
+            break;
+          case 'userId':
+            break;
+          case 'rank':
+            break;
+          case 'battle':
+            //embed.addFields({ name: key, value: `${value ? `${JSON.stringify(Object.values(Object.values(value)[1])[2]).replaceAll('"', '')}\n${battleIdToHash(value.string.match(/battleId = \w+/)[0].split(' ')[2])}` : `No Battle`}`, inline: false });
+            break;
+          default:
+            //embed.addFields({ name: key, value: JSON.stringify(value), inline: false });
+        };
+      });
+      if (hidden.includes(foundData.uid)) {
+        embed = new EmbedBuilder()
+          .setTitle(`❌ ${foundData.uid} - Hidden`)
+          .setThumbnail(ranks[foundData.rank])
+          .setColor("#ff0000")
+          .setTimestamp();
+      };
+      await interaction.editReply({ embeds: [embed] });
+      await savePlayer([foundData]);
+    } else {
+      console.log(foundData);
+      await interaction.editReply(foundData);
+    }
+  };
 });
 
 client.on('messageCreate', async message => {
@@ -320,7 +485,7 @@ var page;
 (async () => {
   const pathToExtension = path.join(__dirname, 'extension');
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: 'new',
     executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
     args: [
       `--disable-extensions-except=${pathToExtension}`,
