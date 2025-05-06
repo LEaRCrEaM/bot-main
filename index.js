@@ -512,7 +512,7 @@ var page;
 (async () => {
   const pathToExtension = path.join(__dirname, 'extension');
   const browser = await puppeteer.launch({
-    headless: 'new',
+    headless: false,
     executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
     args: [
       `--disable-extensions-except=${pathToExtension}`,
@@ -853,7 +853,7 @@ var page;
   });
   ready = true;
   console.log('loaded');
-  const refreshInterval = 1000 * 60 * 5;
+  const refreshInterval = 1000 * 60;
   async function refreshPage() {
     console.log('Refreshing page...');
     try {
@@ -864,7 +864,9 @@ var page;
       setTimeout(refreshPage, refreshInterval);
     };
   };
-  refreshPage();
+  setTimeout(() => {
+    refreshPage();
+  }, refreshInterval);
 })();
 
 const app = express();
