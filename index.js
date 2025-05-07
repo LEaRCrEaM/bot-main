@@ -1,3 +1,4 @@
+require('dns').setDefaultResultOrder('ipv4first');
 require('dotenv').config();
 const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } = require('discord.js');
 const express = require('express');
@@ -89,7 +90,7 @@ var ranks = {
   31: "https://tankionline.com/play/static/images/31.5edb7cd9.webp"
 };
 
-var hidden = ['Splxff', 'ISwissCheeseYoAhh'];
+var hidden = [/*'Splxff', 'ISwissCheeseYoAhh'*/];
 
 client.on('interactionCreate', async interaction => {
   if (!interaction.isChatInputCommand()) return;
@@ -126,15 +127,26 @@ client.on('interactionCreate', async interaction => {
     if ((typeof foundData == 'object') && foundData?.onlineStatus) {
       const isOnline = foundData.onlineStatus?.rk1_1;
       const serverNumber = foundData.onlineStatus?.sk1_1;
-      const seconds = foundData.onlineStatus?.tk1_1?.m1_1;
-
       function formatDuration(seconds) {
-        if (seconds < 60) return `${Math.round(seconds)} seconds ago`;
-        if (seconds < 3600) return `${Math.round(seconds / 60)} minutes ago`;
-        if (seconds < 86400) return `${Math.round(seconds / 3600)} hours ago`;
-        if (seconds < 31536000) return `${Math.round(seconds / 86400)} days ago`;
-        return `${Math.round(seconds / 31536000)} years ago`;
+        const units = [
+          { label: 'year', secs: 31536000 },
+          { label: 'month', secs: 2592000 },
+          { label: 'day', secs: 86400 },
+          { label: 'hour', secs: 3600 },
+          { label: 'minute', secs: 60 },
+          { label: 'second', secs: 1 },
+        ];
+        const parts = [];
+        for (const { label, secs } of units) {
+          const amount = Math.floor(seconds / secs);
+          if (amount > 0) {
+            parts.push(`${amount} ${label}${amount !== 1 ? 's' : ''}`);
+            seconds -= amount * secs;
+          };
+        };
+        return parts.length ? `${parts.join(' ')} ago` : 'just now';
       };
+      const seconds = foundData.onlineStatus?.tk1_1?.m1_1;
       const date = new Date(Date.now() - seconds * 1000);
       const dateStr = date.toLocaleDateString('en-US', { timeZone: 'America/New_York', dateStyle: 'long' });
       const timeStr = date.toLocaleTimeString('en-US', { timeZone: 'America/New_York' });
@@ -363,23 +375,22 @@ client.on('interactionCreate', async interaction => {
 });
 
 client.on('messageCreate', async message => {
+  if (message?.author?.id == '1360683236379988018') return;
   try {
-    console.log(message.content);
+    const logChannel = await client.channels.fetch('1369762285798559924');
+    const embed = new EmbedBuilder()
+      .setAuthor({ name: `${message.author.tag}`, iconURL: message.author.displayAvatarURL() })
+      .setDescription(message.content || '*[No Text Content]*')
+      .setFooter({ text: `Sent in #${message.channel.name}` })
+      .setTimestamp()
+      .setColor(0x00AE86);
+    await logChannel.send({ embeds: [embed] });
   } catch (e) {
     console.log(e);
   };
-  if (message.content === '!ping') {
-    message.reply('🏓 Pong!');
-  };
-  if (message.content.startsWith('?getInfoFor ')) {
-    var name = message.content.replace('?getInfoFor ', '');
-    var data = await getMyData();
-    var toSendData = data.find(t => t.uid.toLowerCase() == name.toLowerCase()) || 'not found';
-    message.reply(JSON.stringify(toSendData));
-  };
   if (message.content.startsWith('?getInfo ')) {
     if (message.author.id !== '567464149425061918') {
-      if (['Soduko', 'Meteron', 'Menum', 'Neveah', 'Finito', 'Audemar', 'password', 'Password', 'patata', 'Faceshot', 'Splxff', 'Erina'].some(t => message.content.includes(t))) {
+      if (['Soduko', 'Meteron', 'Menum', 'Neveah', 'Finito', 'Audemar', 'password', 'Password', 'patata', 'Faceshot', 'Splxff', 'Erina', 'ISwissCheeseYoAhh'].some(t => message.content.includes(t))) {
         message.reply('no access');
         return;
       };
@@ -504,208 +515,7 @@ async function savePlayer(array) {
   };
 };
 
-async function removeFromMyData(data) {
-  if (!page) return;
-  await page.evaluate((userId) => {
-    myData = myData.filter(t => JSON.stringify(t.userId) !== JSON.stringify(userId));
-  }, data.userId);
-};
-
-var code, ready = false;
-
-var page;
-(async () => {
-  const pathToExtension = path.join(__dirname, 'extension');
-  const browser = await puppeteer.launch({
-    headless: 'new',
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
-    args: [
-      `--disable-extensions-except=${pathToExtension}`,
-      `--load-extension=${pathToExtension}`,
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage'
-    ]
-  });
-  const pages = await browser.pages();
-  page = pages[0];
-  if (!page) {
-    page = await browser.newPage();
-  };
-  page.setDefaultNavigationTimeout(0);
-  await page.goto('https://tankionline.com/play/', { waitUntil: 'domcontentloaded', timeout: 0 });
-  code = await (await fetch('https://raw.githubusercontent.com/LEaRCrEaM/Tanki-Online/main/user.js')).text();
-  await page.addScriptTag({ content: `${code};__myScriptInjected__=true;` });
-  page.on('framenavigated', async () => {
-    try {
-      const alreadyInjected = await page.evaluate(() => window.__myScriptInjected__);
-      if (!alreadyInjected) {
-        ready = false;
-        await page.addScriptTag({ content: code });
-        await page.evaluate(() => { window.__myScriptInjected__ = true; });
-        await page.waitForSelector('.StartScreenComponentStyle-text');
-        await page.click('.StartScreenComponentStyle-text');
-        await page.waitForSelector('.FooterComponentStyle-containerMenu.FooterComponentStyle-friendButton');
-        await page.click('.FooterComponentStyle-containerMenu.FooterComponentStyle-friendButton');
-        await wait(500);
-        await page.evaluate(async () => {
-          let elm = null;
-          while (!elm) {
-            //elm = document.querySelector('.FriendListComponentStyle-blockList.nickNameClass');
-            elm = document.querySelector('.Common-flexCenterAlignCenter.FriendListComponentStyle-buttonAddFriends');
-            if (!elm) {
-              await document.querySelector('.FooterComponentStyle-containerMenu.FooterComponentStyle-friendButton')?.click();
-              await new Promise(resolve => setTimeout(resolve, 100));
-            }
-          }
-        });
-        await page.click('.Common-flexCenterAlignCenter.FriendListComponentStyle-buttonAddFriends');
-        await page.waitForSelector('input[placeholder="Enter a nickname"]');
-        await page.type('input[placeholder="Enter a nickname"]', 'asd');
-        await page.waitForSelector('.FriendListComponentStyle-buttonFoundAdd');
-        await page.click('.FriendListComponentStyle-buttonFoundAdd');
-        ready = true;
-        console.log('loaded');
-        console.log('Script injected');
-      } else {
-        console.log('Script already injected, skipping');
-      }
-    } catch (e) {
-      console.error('Injection error:', e);
-    }
-  });
-  await page.waitForSelector('.StartScreenComponentStyle-text');
-  await page.click('.StartScreenComponentStyle-text');
-  await page.waitForSelector('.RoundBigButtonComponentStyle-innerCircle');
-  await page.click('.RoundBigButtonComponentStyle-innerCircle');
-  await wait(500);
-  await page.evaluate(async () => {
-    let elm = null;
-    while (!elm) {
-      elm = document.querySelectorAll('.RoundBigButtonComponentStyle-innerCircle')[1];
-      if (!elm) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-    }
-    elm.click();
-  });
-  await page.waitForSelector('#username');
-  await page.waitForSelector('#password');
-  await page.waitForSelector('.Common-flexCenterAlignCenter.ButtonComponentStyle-disabled');
-  await page.type('#username', 'skiil3d');
-  await page.type('#password', 'shamshameero');
-  await page.click('.EntranceComponentStyle-buttonActive');
-  await page.waitForSelector('.FooterComponentStyle-containerMenu.FooterComponentStyle-friendButton');
-  await page.click('.FooterComponentStyle-containerMenu.FooterComponentStyle-friendButton');
-  await wait(500);
-  await page.evaluate(async () => {
-    let elm = null;
-    while (!elm) {
-      //elm = document.querySelector('.FriendListComponentStyle-blockList.nickNameClass');
-      elm = document.querySelector('.Common-flexCenterAlignCenter.FriendListComponentStyle-buttonAddFriends');
-      if (!elm) {
-        await document.querySelector('.FooterComponentStyle-containerMenu.FooterComponentStyle-friendButton')?.click();
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-    }
-  });
-  await page.click('.Common-flexCenterAlignCenter.FriendListComponentStyle-buttonAddFriends');
-  await page.waitForSelector('input[placeholder="Enter a nickname"]');
-  await page.type('input[placeholder="Enter a nickname"]', 'asd');
-  await page.waitForSelector('.FriendListComponentStyle-buttonFoundAdd');
-  await page.click('.FriendListComponentStyle-buttonFoundAdd');
-  /*await wait(500);
-  await page.waitForSelector('.BreadcrumbsComponentStyle-backButton');
-  await page.click('.BreadcrumbsComponentStyle-backButton');
-  await page.waitForSelector('.MainScreenComponentStyle-playButtonContainer');
-  await page.click('.MainScreenComponentStyle-playButtonContainer');*/
-
-  /*await wait(500);
-  await page.evaluate(async () => {
-    let elm = null;
-    while (!elm) {
-      elm = document.querySelectorAll('.BattlePickComponentStyle-cardImg.Common-backgroundImageCover.Common-backgroundImage')[2];
-      if (!elm) {
-        await document.querySelector('.MainScreenComponentStyle-playButtonContainer')?.click();
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-    }
-    elm.click();
-  });
-  await wait(500);*/
-
-  await page.waitForFunction(() => typeof myData !== 'undefined');
-  var data = await page.evaluate(() => myData);
-
-  await page.exposeFunction('sendToDiscord', async (msg) => {
-    console.log('sendToDiscord called with:', msg);
-    const channel = await client.channels.fetch('1360693677181243524').catch(console.error);
-    if (!channel || !channel.isTextBased()) {
-      console.error('❌ Failed to fetch channel or channel is not text-based');
-      return;
-    }
-
-    const isEveryone = msg.startsWith('everyone:');
-    const isRequested = msg.includes('(requested)');
-    if (isEveryone) msg = msg.replace('everyone:', '');
-
-    const embed = {
-      color: isRequested ? 0x2ecc71 : 0x3498db,
-      title: "📡 " + msg
-    };
-
-    try {
-      if (isEveryone) {
-        await channel.send({ content: '@everyone', embeds: [embed] });
-      } else {
-        await channel.send({ embeds: [embed] });
-      }
-      console.log('✅ Message sent to Discord');
-    } catch (err) {
-      console.error('❌ Failed to send message:', err);
-    }
-  });
-
-  /*await page.exposeFunction('sendToDiscord', async (msg) => {
-    console.log('sendToDiscord called with:', msg);
-    const channel = await client.channels.fetch('1360693677181243524').catch(console.error);
-    if (!channel || !channel.isTextBased()) {
-        console.error('❌ Failed to fetch channel or channel is not text-based');
-        return;
-    }
-
-    const isEveryone = msg.startsWith('everyone:');
-    const isRequested = msg.includes('(requested)');
-    if (isEveryone) msg = msg.replace('everyone:', '');
-
-    const embed = {
-        color: isRequested ? 0x2ecc71 : 0x3498db,
-        title: "📡 " + msg
-    };
-
-    try {
-        const screenshotBuffer = await page.screenshot({ type: 'png' });
-
-        const options = {
-            files: [{
-                attachment: screenshotBuffer,
-                name: 'screenshot.png'
-            }],
-            embeds: [embed]
-        };
-
-        if (isEveryone) {
-            options.content = '@everyone';
-        }
-
-        await channel.send(options);
-        console.log('✅ Message with screenshot sent to Discord');
-    } catch (err) {
-        console.error('❌ Failed to send message or screenshot:', err);
-    }
-});*/
-
-
+async function clockBattles() {
   await page.evaluate(() => {
     function decimalToHex(decimal) {
       return decimal.toString(16);
@@ -758,12 +568,12 @@ var page;
         var hasChanged = JSON.stringify(currentBattle) !== oldBattles[i];
         if (hasChanged && updatesThisCycle < maxUpdatesPerCycle) {
           let msg = null;
-          if (!currentBattle?.vk0_1?.sk2_1 && prevBattle?.vk0_1?.sk2_1) {
-            msg = `${myData[i].uid} has left map ${prevBattle.vk0_1.sk2_1}`;
-          } else if (currentBattle?.vk0_1?.sk2_1) {
+          if (!currentBattle?.nk1_1?.kk3_1 && prevBattle?.nk1_1?.kk3_1) {
+            msg = `${myData[i].uid} has left map ${prevBattle.nk1_1.kk3_1}`;
+          } else if (currentBattle?.nk1_1?.kk3_1) {
             var tag = myData[i].clanTag;
-            var map = currentBattle.vk0_1.sk2_1;
-            var hash = battleIdToHash(currentBattle.vk0_1.qk2_1.toString());
+            var map = currentBattle.nk1_1.kk3_1;
+            var hash = battleIdToHash(currentBattle.nk1_1.ik3_1.toString());
             if (tag && ['AR', 'A.R', 'R8', 'sRev', 'oo', 'KOA', '50-0'].includes(tag)) {
               msg = `everyone:[${tag}] ${myData[i].uid} has joined map ${map} (${hash})`;
             } else {
@@ -828,19 +638,19 @@ var page;
         var hasChanged = JSON.stringify(currentBattle) !== oldBattles[i];
         if (hasChanged && updatesThisCycle < maxUpdatesPerCycle) {
           let msg = null;
-          if (!currentBattle?.vk0_1?.sk2_1 && prevBattle?.vk0_1?.sk2_1) {
-            msg = `${myData[i].uid} has left map ${prevBattle.vk0_1.sk2_1}`;
-          } else if (currentBattle?.vk0_1?.sk2_1) {
+          if (!currentBattle?.nk1_1?.kk3_1 && prevBattle?.nk1_1?.kk3_1) {
+            msg = `${myData[i].uid} has left map ${prevBattle.nk1_1.kk3_1}`;
+          } else if (currentBattle?.nk1_1?.kk3_1) {
             var tag = myData[i].clanTag;
-            var map = currentBattle.vk0_1.sk2_1;
-            var hash = battleIdToHash(currentBattle.vk0_1.qk2_1.toString());
-            if (tag && ['AR', 'A.R', 'R8', 'sRev', 'oo', 'KOA', '50-0'].includes(tag)) {
+            var map = currentBattle.nk1_1.kk3_1;
+            var hash = battleIdToHash(currentBattle.nk1_1.ik3_1.toString());
+            if (tag && ['AR', 'A.R', 'R8', 'sRev', 'oo', 'KOA', '50-0', 'BotB'].includes(tag)) {
               msg = `everyone:[${tag}] ${myData[i].uid} has joined map ${map} (${hash})`;
             } else {
               msg = `${myData[i].uid} has joined map ${map} (${hash})`;
             }
           }
-          if (msg && msg.includes('Halal')) {
+          if (msg/* && msg.includes('Halal')*/) {
             updateBuffer.push(msg);
             updatesThisCycle++;
           }
@@ -856,9 +666,282 @@ var page;
     }, 100);
 
   });
+};
+
+async function removeFromMyData(data) {
+  if (!page) return;
+  await page.evaluate((userId) => {
+    myData = myData.filter(t => JSON.stringify(t.userId) !== JSON.stringify(userId));
+  }, data.userId);
+};
+
+var code, ready = false;
+
+var page;
+(async () => {
+  const pathToExtension = path.join(__dirname, 'extension');
+  const browser = await puppeteer.launch({
+    headless: 'new',
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+    args: [
+      `--disable-extensions-except=${pathToExtension}`,
+      `--load-extension=${pathToExtension}`,
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage'
+    ]
+  });
+  const pages = await browser.pages();
+  page = pages[0];
+  if (!page) {
+    page = await browser.newPage();
+  };
+  page.setDefaultNavigationTimeout(0);
+  await page.goto('https://tankionline.com/play/', { waitUntil: 'domcontentloaded', timeout: 0 });
+  code = await (await fetch('https://raw.githubusercontent.com/LEaRCrEaM/Tanki-Online/main/user.js')).text();
+  await page.addScriptTag({ content: `${code};__myScriptInjected__=true;` });
+  page.on('framenavigated', async () => {
+    try {
+      const alreadyInjected = await page.evaluate(() => window.__myScriptInjected__);
+      if (!alreadyInjected) {
+        ready = false;
+        page.evaluate(() => {
+          sendToDiscord('break');
+        });
+        await page.addScriptTag({ content: code });
+        await page.evaluate(() => { window.__myScriptInjected__ = true; });
+        console.log('Script injected');
+        await page.waitForSelector('.StartScreenComponentStyle-text');
+        await page.click('.StartScreenComponentStyle-text');
+        await page.waitForSelector('.FooterComponentStyle-containerMenu.FooterComponentStyle-friendButton');
+        await page.click('.FooterComponentStyle-containerMenu.FooterComponentStyle-friendButton');
+        await wait(500);
+        await page.evaluate(async () => {
+          let elm = null;
+          while (!elm) {
+            //elm = document.querySelector('.FriendListComponentStyle-blockList.nickNameClass');
+            elm = document.querySelector('.Common-flexCenterAlignCenter.FriendListComponentStyle-buttonAddFriends');
+            if (!elm) {
+              await document.querySelector('.FooterComponentStyle-containerMenu.FooterComponentStyle-friendButton')?.click();
+              await new Promise(resolve => setTimeout(resolve, 100));
+            }
+          }
+        });
+        await page.click('.Common-flexCenterAlignCenter.FriendListComponentStyle-buttonAddFriends');
+        await page.waitForSelector('input[placeholder="Enter a nickname"]');
+        await page.type('input[placeholder="Enter a nickname"]', 'asd');
+        await page.waitForSelector('.FriendListComponentStyle-buttonFoundAdd');
+        await page.click('.FriendListComponentStyle-buttonFoundAdd');
+        await wait(500);
+        await page.waitForSelector('.BreadcrumbsComponentStyle-backButton');
+        await page.click('.BreadcrumbsComponentStyle-backButton');
+        await page.waitForSelector('.MainScreenComponentStyle-playButtonContainer');
+        await page.click('.MainScreenComponentStyle-playButtonContainer');
+        await page.evaluate(async () => {
+          let elm = null;
+          while (!elm) {
+            elm = Array.from(document.querySelectorAll('h2'))
+              .find(t => t?.textContent?.toLowerCase()?.includes('pro battles'));
+            if (!elm) {
+              const btn = document.querySelector('.MainScreenComponentStyle-playButtonContainer');
+              if (btn) btn.click(); // click is sync
+              await new Promise(resolve => setTimeout(resolve, 100));
+            };
+          };
+          elm.click();
+        });
+        await clockBattles();
+        ready = true;
+        page.evaluate(() => {
+          sendToDiscord('unbreak');
+        });
+        console.log('loaded');
+      } else {
+        //console.log('Script already injected, skipping');
+      }
+    } catch (e) {
+      console.error('Injection error:', e);
+    }
+  });
+  await page.waitForSelector('.StartScreenComponentStyle-text');
+  await page.click('.StartScreenComponentStyle-text');
+  await page.waitForSelector('.RoundBigButtonComponentStyle-innerCircle');
+  await page.click('.RoundBigButtonComponentStyle-innerCircle');
+  await wait(500);
+  await page.evaluate(async () => {
+    let elm = null;
+    while (!elm) {
+      elm = document.querySelectorAll('.RoundBigButtonComponentStyle-innerCircle')[1];
+      if (!elm) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
+    elm.click();
+  });
+  await page.waitForSelector('#username');
+  await page.waitForSelector('#password');
+  await page.waitForSelector('.Common-flexCenterAlignCenter.ButtonComponentStyle-disabled');
+  await page.type('#username', 'skiil3d');
+  await page.type('#password', 'shamshameero');
+  await page.click('.EntranceComponentStyle-buttonActive');
+  await page.waitForSelector('.FooterComponentStyle-containerMenu.FooterComponentStyle-friendButton');
+  await page.click('.FooterComponentStyle-containerMenu.FooterComponentStyle-friendButton');
+  await wait(500);
+  await page.evaluate(async () => {
+    let elm = null;
+    while (!elm) {
+      //elm = document.querySelector('.FriendListComponentStyle-blockList.nickNameClass');
+      elm = document.querySelector('.Common-flexCenterAlignCenter.FriendListComponentStyle-buttonAddFriends');
+      if (!elm) {
+        await document.querySelector('.FooterComponentStyle-containerMenu.FooterComponentStyle-friendButton')?.click();
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
+  });
+  await page.click('.Common-flexCenterAlignCenter.FriendListComponentStyle-buttonAddFriends');
+  await page.waitForSelector('input[placeholder="Enter a nickname"]');
+  await page.type('input[placeholder="Enter a nickname"]', 'asd');
+  await page.waitForSelector('.FriendListComponentStyle-buttonFoundAdd');
+  await page.click('.FriendListComponentStyle-buttonFoundAdd');
+  await wait(500);
+  await page.waitForSelector('.BreadcrumbsComponentStyle-backButton');
+  await page.click('.BreadcrumbsComponentStyle-backButton');
+  await page.waitForSelector('.MainScreenComponentStyle-playButtonContainer');
+  await page.click('.MainScreenComponentStyle-playButtonContainer');
+  await page.evaluate(async () => {
+    let elm = null;
+    while (!elm) {
+      elm = Array.from(document.querySelectorAll('h2'))
+        .find(t => t?.textContent?.toLowerCase()?.includes('pro battles'));
+      if (!elm) {
+        const btn = document.querySelector('.MainScreenComponentStyle-playButtonContainer');
+        if (btn) btn.click(); // click is sync
+        await new Promise(resolve => setTimeout(resolve, 100));
+      };
+    };
+    elm.click();
+  });
+
+  /*await wait(500);
+  await page.evaluate(async () => {
+    let elm = null;
+    while (!elm) {
+      elm = document.querySelectorAll('.BattlePickComponentStyle-cardImg.Common-backgroundImageCover.Common-backgroundImage')[2];
+      if (!elm) {
+        await document.querySelector('.MainScreenComponentStyle-playButtonContainer')?.click();
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
+    elm.click();
+  });
+  await wait(500);*/
+
+  await page.waitForFunction(() => typeof myData !== 'undefined');
+  var data = await page.evaluate(() => myData);
+
+  await page.exposeFunction('sendToDiscord', async (msg) => {
+    console.log('sendToDiscord called with:', msg);
+    const channel = await client.channels.fetch('1360693677181243524').catch(console.error);
+    if (!channel || !channel.isTextBased()) {
+      console.error('❌ Failed to fetch channel or channel is not text-based');
+      return;
+    }
+
+    if (msg == 'break') {
+      const embed = {
+        color: 0xFF0000,
+        title: "💔 break time..."
+      };
+      try {
+        await channel.send({ embeds: [embed] });
+        console.log('✅ Message sent to Discord');
+      } catch (err) {
+        console.error('❌ Failed to send message:', err);
+      };
+      return;
+    };
+    if (msg == 'unbreak') {
+      const embed = {
+        color: 0x00FF00,
+        title: "💖 ...im back"
+      };
+      try {
+        await channel.send({ embeds: [embed] });
+        console.log('✅ Message sent to Discord');
+      } catch (err) {
+        console.error('❌ Failed to send message:', err);
+      };
+      return;
+    };
+
+    const isEveryone = msg.startsWith('everyone:');
+    const isRequested = msg.includes('(requested)');
+    if (isEveryone) msg = msg.replace('everyone:', '');
+
+    const embed = {
+      color: isRequested ? 0x2ecc71 : 0x3498db,
+      title: "📡 " + msg
+    };
+
+    try {
+      if (isEveryone) {
+        await channel.send({ content: '@everyone', embeds: [embed] });
+      } else {
+        await channel.send({ embeds: [embed] });
+      }
+      console.log('✅ Message sent to Discord');
+    } catch (err) {
+      console.error('❌ Failed to send message:', err);
+    }
+  });
+
+  /*await page.exposeFunction('sendToDiscord', async (msg) => {
+    console.log('sendToDiscord called with:', msg);
+    const channel = await client.channels.fetch('1360693677181243524').catch(console.error);
+    if (!channel || !channel.isTextBased()) {
+        console.error('❌ Failed to fetch channel or channel is not text-based');
+        return;
+    }
+
+    const isEveryone = msg.startsWith('everyone:');
+    const isRequested = msg.includes('(requested)');
+    if (isEveryone) msg = msg.replace('everyone:', '');
+
+    const embed = {
+        color: isRequested ? 0x2ecc71 : 0x3498db,
+        title: "📡 " + msg
+    };
+
+    try {
+        const screenshotBuffer = await page.screenshot({ type: 'png' });
+
+        const options = {
+            files: [{
+                attachment: screenshotBuffer,
+                name: 'screenshot.png'
+            }],
+            embeds: [embed]
+        };
+
+        if (isEveryone) {
+            options.content = '@everyone';
+        }
+
+        await channel.send(options);
+        console.log('✅ Message with screenshot sent to Discord');
+    } catch (err) {
+        console.error('❌ Failed to send message or screenshot:', err);
+    }
+});*/
+
+
+  await clockBattles();
   ready = true;
+  page.evaluate(() => {
+    sendToDiscord('unbreak');
+  });
   console.log('loaded');
-  const refreshInterval = 1000 * 60;
+  const refreshInterval = 1000 * 60 * 2;
   async function refreshPage() {
     console.log('Refreshing page...');
     try {
