@@ -377,7 +377,7 @@ client.on('interactionCreate', async interaction => {
 client.on('messageCreate', async message => {
   if (message?.author?.id == '1360683236379988018') return;
   try {
-    const logChannel = await client.channels.fetch('1369762285798559924');
+    const logChannel = await client.channels.fetch('1370165748063801426');
     const embed = new EmbedBuilder()
       .setAuthor({ name: `${message.author.tag}`, iconURL: message.author.displayAvatarURL() })
       .setDescription(message.content || '*[No Text Content]*')
