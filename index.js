@@ -101,11 +101,11 @@ client.on('interactionCreate', async interaction => {
   };
   if (interaction.commandName === 'check') {
     const name = interaction.options.getString('username');
-    //for (let i = 0; i < 5; i++) {
-    //setTimeout(() => {
+    for (let i = 0; i < 3; i++) {
+    setTimeout(() => {
     SubscribeTo(name);
-    //}, i * 1000);
-    //};
+    }, i * 1000);
+    };
     //Subscribeto2(name);
     await interaction.deferReply();
     let attempts = 0;
@@ -206,11 +206,11 @@ client.on('interactionCreate', async interaction => {
   };
   if (interaction.commandName === 'whois') {
     const name = interaction.options.getString('username');
-    //for (let i = 0; i < 5; i++) {
-    //setTimeout(() => {
+    for (let i = 0; i < 5; i++) {
+    setTimeout(() => {
     SubscribeTo(name);
-    //}, i * 1000);
-    //};
+    }, i * 1000);
+    };
     //Subscribeto2(name);
     await interaction.deferReply();
     let attempts = 0;
@@ -290,11 +290,11 @@ client.on('interactionCreate', async interaction => {
   };
   if (interaction.commandName === 'clans') {
     const name = interaction.options.getString('username');
-    //for (let i = 0; i < 5; i++) {
-    //setTimeout(() => {
+    for (let i = 0; i < 5; i++) {
+    setTimeout(() => {
     SubscribeTo(name);
-    //}, i * 1000);
-    //};
+    }, i * 1000);
+    };
     //Subscribeto2(name);
     await interaction.deferReply();
     let attempts = 0;
