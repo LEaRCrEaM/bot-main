@@ -102,9 +102,9 @@ client.on('interactionCreate', async interaction => {
   if (interaction.commandName === 'check') {
     const name = interaction.options.getString('username');
     for (let i = 0; i < 3; i++) {
-    setTimeout(() => {
-    SubscribeTo(name);
-    }, i * 1000);
+      setTimeout(() => {
+        SubscribeTo(name);
+      }, i * 1000);
     };
     //Subscribeto2(name);
     await interaction.deferReply();
@@ -156,7 +156,12 @@ client.on('interactionCreate', async interaction => {
         .then(async r => await r.json())
         .then(async d => savedData = await d)
         .catch(async err => await console.error('Fetch error:', err));
-      var foundInSavedData = await savedData.find(t => JSON.stringify(t.userId) == JSON.stringify(foundData.userId)) || null;
+      var foundInSavedData;
+      if (savedData) {
+        foundInSavedData = await savedData?.find(t => JSON.stringify(t?.userId) == JSON.stringify(foundData?.userId)) || null;
+      } else {
+        foundInSavedData = null;
+      };
       var embed = new EmbedBuilder()
         .setTitle(`✅ ${foundData.uid} - Found`)
         .setColor(isOnline ? 0x00ff00 : 0xff0000)
@@ -207,9 +212,9 @@ client.on('interactionCreate', async interaction => {
   if (interaction.commandName === 'whois') {
     const name = interaction.options.getString('username');
     for (let i = 0; i < 5; i++) {
-    setTimeout(() => {
-    SubscribeTo(name);
-    }, i * 1000);
+      setTimeout(() => {
+        SubscribeTo(name);
+      }, i * 1000);
     };
     //Subscribeto2(name);
     await interaction.deferReply();
@@ -291,9 +296,9 @@ client.on('interactionCreate', async interaction => {
   if (interaction.commandName === 'clans') {
     const name = interaction.options.getString('username');
     for (let i = 0; i < 5; i++) {
-    setTimeout(() => {
-    SubscribeTo(name);
-    }, i * 1000);
+      setTimeout(() => {
+        SubscribeTo(name);
+      }, i * 1000);
     };
     //Subscribeto2(name);
     await interaction.deferReply();
