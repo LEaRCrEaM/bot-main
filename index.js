@@ -5,6 +5,7 @@ const express = require('express');
 const path = require('path');
 const fetch = require('node-fetch');
 const WebSocket = require('ws');
+const pako = require('pako');
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
@@ -668,6 +669,34 @@ async function clockBattles() {
   });
 };
 
+async function saveAllPlayers() {
+  try {
+    var array = await getMyData();
+    var jsonStr = await JSON.stringify(array);
+    var compressed = await pako.deflate(jsonStr);
+    var base64 = await btoa(String.fromCharCode.apply(null, compressed));
+    const ws = new WebSocket('wss://verdant-pollen-lamp.glitch.me', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0',
+        'Origin': 'https://glitch.me'
+      }
+    });
+    ws.onopen = async () => {
+      await ws.send('bulk:' + base64);
+    };
+    ws.onmessage = async (event) => {
+      await console.log(`Server response: ${event.data}`);
+    };
+    ws.onerror = async (err) => {
+      await console.error('WebSocket error:', err);
+      await console.log('WebSocket error');
+    };
+  } catch (err) {
+    await console.error('Parse/compress error:', err);
+    await console.log('Invalid JSON');
+  }
+};
+
 async function removeFromMyData(data) {
   if (!page) return;
   await page.evaluate((userId) => {
@@ -943,6 +972,8 @@ var page;
   console.log('loaded');
   const refreshInterval = 1000 * 60 * 2;
   async function refreshPage() {
+    console.log('saving all players');
+    await saveAllPlayers();
     console.log('Refreshing page...');
     try {
       await page.reload({ waitUntil: 'domcontentloaded', timeout: 0 });
