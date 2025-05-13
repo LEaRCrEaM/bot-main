@@ -91,7 +91,7 @@ var ranks = {
   31: "https://tankionline.com/play/static/images/31.5edb7cd9.webp"
 };
 
-var hidden = [/*'Splxff', 'ISwissCheeseYoAhh'*/];
+var hidden = ['Splxff', /*'ISwissCheeseYoAhh'*/'OTF'];
 
 client.on('interactionCreate', async interaction => {
   if (!interaction.isChatInputCommand()) return;
