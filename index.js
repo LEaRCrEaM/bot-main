@@ -457,7 +457,7 @@ async function getMyData() {
 async function SubscribeTo(name) {
   if (!page) return null;
   return await page.evaluate((username) => {
-    AddFriend.o3q(new Friend(username));
+    AddFriend.s3q(new Friend(username));
   }, name);
 };
 
