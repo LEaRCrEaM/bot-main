@@ -126,8 +126,8 @@ client.on('interactionCreate', async interaction => {
     var data = await getMyData();
     foundData = data.find(t => t.uid.toLowerCase() === name.toLowerCase()) || 'username not found';
     if ((typeof foundData == 'object') && foundData?.onlineStatus) {
-      const isOnline = foundData.onlineStatus?.rk1_1;
-      const serverNumber = foundData.onlineStatus?.sk1_1;
+      const isOnline = foundData.onlineStatus?.wk1_1;
+      const serverNumber = foundData.onlineStatus?.xk1_1;
       function formatDuration(seconds) {
         const units = [
           { label: 'year', secs: 31536000 },
@@ -147,7 +147,7 @@ client.on('interactionCreate', async interaction => {
         };
         return parts.length ? `${parts.join(' ')} ago` : 'just now';
       };
-      const seconds = foundData.onlineStatus?.tk1_1?.m1_1;
+      const seconds = foundData.onlineStatus?.yk1_1?.m1_1;
       const date = new Date(Date.now() - seconds * 1000);
       const dateStr = date.toLocaleDateString('en-US', { timeZone: 'America/New_York', dateStyle: 'long' });
       const timeStr = date.toLocaleTimeString('en-US', { timeZone: 'America/New_York' });
@@ -231,9 +231,9 @@ client.on('interactionCreate', async interaction => {
     var data = await getMyData();
     foundData = data.find(t => t.uid.toLowerCase() === name.toLowerCase()) || 'username not found';
     if ((typeof foundData == 'object') && foundData?.onlineStatus) {
-      const isOnline = foundData.onlineStatus?.rk1_1;
-      const serverNumber = foundData.onlineStatus?.sk1_1;
-      const seconds = foundData.onlineStatus?.tk1_1?.m1_1;
+      const isOnline = foundData.onlineStatus?.wk1_1;
+      const serverNumber = foundData.onlineStatus?.xk1_1;
+      const seconds = foundData.onlineStatus?.yk1_1?.m1_1;
       const hours = (seconds / 3600).toFixed(1);
       const lastOnline = `${hours} Hours Ago | ` + new Date(Date.now() - seconds * 1000).toLocaleTimeString('en-US', { timeZone: 'America/New_York' }) + ' (EST)';
       var savedData;
@@ -315,9 +315,9 @@ client.on('interactionCreate', async interaction => {
     var data = await getMyData();
     foundData = data.find(t => t.uid.toLowerCase() === name.toLowerCase()) || 'username not found';
     if ((typeof foundData == 'object') && foundData?.onlineStatus) {
-      const isOnline = foundData.onlineStatus?.rk1_1;
-      const serverNumber = foundData.onlineStatus?.sk1_1;
-      const seconds = foundData.onlineStatus?.tk1_1?.m1_1;
+      const isOnline = foundData.onlineStatus?.wk1_1;
+      const serverNumber = foundData.onlineStatus?.xk1_1;
+      const seconds = foundData.onlineStatus?.yk1_1?.m1_1;
       const hours = (seconds / 3600).toFixed(1);
       const lastOnline = `${hours} Hours Ago | ` + new Date(Date.now() - seconds * 1000).toLocaleTimeString('en-US', { timeZone: 'America/New_York' }) + ' (EST)';
       var savedData;
@@ -398,12 +398,12 @@ client.on('messageCreate', async message => {
     };
     var commandParamsNum = message.content.replace('?getInfo ', '').split(' ').length - 1;
     var commandParams = message.content.replace('?getInfo ', '').split(' ');
-    fetch('https://verdant-pollen-lamp.glitch.me/api/viewMessages')
-      .then(r => {
-        return r.text();
+    await fetch('https://verdant-pollen-lamp.glitch.me/api/viewMessages')
+      .then(async r => {
+        return await r.text();
       })
-      .then(d => {
-        var data = JSON.parse(d).messages.filter(t => !['Neveah', 'Menum', 'Concealed'].includes(t.name));
+      .then(async d => {
+        var data = await JSON.parse(d).messages.filter(t => !['Neveah', 'Menum', 'Concealed'].includes(t.name));
         var names = '';
         data.forEach(message => {
           names += `${message.name}, `;
@@ -556,9 +556,9 @@ async function clockBattles() {
           if (!foundToTrackIds[i]?.oldStatus) {
             foundToTrackIds[i].oldStatus = false;
           };
-          if (foundToTrackIds[i].onlineStatus.rk1_1 !== foundToTrackIds[i].oldStatus) {
-            foundToTrackIds[i].oldStatus = foundToTrackIds[i].onlineStatus.rk1_1;
-            sendToDiscord(`everyone:${foundToTrackIds[i].uid} is now ${foundToTrackIds[i].onlineStatus.rk1_1 ? 'online' : 'offline'}`);
+          if (foundToTrackIds[i].onlineStatus.wk1_1 !== foundToTrackIds[i].oldStatus) {
+            foundToTrackIds[i].oldStatus = foundToTrackIds[i].onlineStatus.wk1_1;
+            sendToDiscord(`everyone:${foundToTrackIds[i].uid} is now ${foundToTrackIds[i].onlineStatus.wk1_1 ? 'online' : 'offline'}`);
           };
         };
       };
@@ -569,12 +569,12 @@ async function clockBattles() {
         var hasChanged = JSON.stringify(currentBattle) !== oldBattles[i];
         if (hasChanged && updatesThisCycle < maxUpdatesPerCycle) {
           let msg = null;
-          if (!currentBattle?.nk1_1?.kk3_1 && prevBattle?.nk1_1?.kk3_1) {
-            msg = `${myData[i].uid} has left map ${prevBattle.nk1_1.kk3_1}`;
-          } else if (currentBattle?.nk1_1?.kk3_1) {
+          if (!currentBattle?.sk1_1?.pk3_1 && prevBattle?.sk1_1?.pk3_1) {
+            msg = `${myData[i].uid} has left map ${prevBattle.sk1_1.pk3_1}`;
+          } else if (currentBattle?.sk1_1?.pk3_1) {
             var tag = myData[i].clanTag;
-            var map = currentBattle.nk1_1.kk3_1;
-            var hash = battleIdToHash(currentBattle.nk1_1.ik3_1.toString());
+            var map = currentBattle.sk1_1.pk3_1;
+            var hash = battleIdToHash(currentBattle.sk1_1.nk3_1.toString());
             if (tag && ['AR', 'A.R', 'R8', 'sRev', 'oo', 'KOA', '50-0'].includes(tag)) {
               msg = `everyone:[${tag}] ${myData[i].uid} has joined map ${map} (${hash})`;
             } else {
@@ -625,9 +625,9 @@ async function clockBattles() {
         for (let i = 0; i < foundToTrackIds.length; i++) {
           if (!foundToTrackIds[i]) continue;
           foundToTrackIds[i].oldStatus ??= false;
-          if (foundToTrackIds[i].onlineStatus.rk1_1 !== foundToTrackIds[i].oldStatus) {
-            foundToTrackIds[i].oldStatus = foundToTrackIds[i].onlineStatus.rk1_1;
-            sendToDiscord(`everyone:${foundToTrackIds[i].uid} is now ${foundToTrackIds[i].onlineStatus.rk1_1 ? 'online' : 'offline'}`);
+          if (foundToTrackIds[i].onlineStatus.wk1_1 !== foundToTrackIds[i].oldStatus) {
+            foundToTrackIds[i].oldStatus = foundToTrackIds[i].onlineStatus.wk1_1;
+            sendToDiscord(`everyone:${foundToTrackIds[i].uid} is now ${foundToTrackIds[i].onlineStatus.wk1_1 ? 'online' : 'offline'}`);
           }
         }
       }
@@ -639,12 +639,12 @@ async function clockBattles() {
         var hasChanged = JSON.stringify(currentBattle) !== oldBattles[i];
         if (hasChanged && updatesThisCycle < maxUpdatesPerCycle) {
           let msg = null;
-          if (!currentBattle?.nk1_1?.kk3_1 && prevBattle?.nk1_1?.kk3_1) {
-            msg = `${myData[i].uid} has left map ${prevBattle.nk1_1.kk3_1}`;
-          } else if (currentBattle?.nk1_1?.kk3_1) {
+          if (!currentBattle?.sk1_1?.pk3_1 && prevBattle?.sk1_1?.pk3_1) {
+            msg = `${myData[i].uid} has left map ${prevBattle.sk1_1.pk3_1}`;
+          } else if (currentBattle?.sk1_1?.pk3_1) {
             var tag = myData[i].clanTag;
-            var map = currentBattle.nk1_1.kk3_1;
-            var hash = battleIdToHash(currentBattle.nk1_1.ik3_1.toString());
+            var map = currentBattle.sk1_1.pk3_1;
+            var hash = battleIdToHash(currentBattle.sk1_1.nk3_1.toString());
             if (tag && ['AR', 'A.R', 'R8', 'sRev', 'oo', 'KOA', '50-0', 'BotB'].includes(tag)) {
               msg = `everyone:[${tag}] ${myData[i].uid} has joined map ${map} (${hash})`;
             } else {
