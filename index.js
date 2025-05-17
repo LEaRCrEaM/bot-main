@@ -91,6 +91,40 @@ var ranks = {
   31: "https://tankionline.com/play/static/images/31.5edb7cd9.webp"
 };
 
+var premiumRanks = {
+  1: "https://tankionline.com/play/static/images/01.aa043ed1.webp",
+  2: "https://tankionline.com/play/static/images/02.476038d2.webp",
+  3: "https://tankionline.com/play/static/images/03.6f91b10c.webp",
+  4: "https://tankionline.com/play/static/images/04.fc7f09c5.webp",
+  5: "https://tankionline.com/play/static/images/05.c136316c.webp",
+  6: "https://tankionline.com/play/static/images/06.2816afbe.webp",
+  7: "https://tankionline.com/play/static/images/07.2d5dc20c.webp",
+  8: "https://tankionline.com/play/static/images/08.b563130a.webp",
+  9: "https://tankionline.com/play/static/images/09.bc6e748e.webp",
+  10: "https://tankionline.com/play/static/images/10.d1b86239.webp",
+  11: "https://tankionline.com/play/static/images/11.747eb099.webp",
+  12: "https://tankionline.com/play/static/images/12.b5621c29.webp",
+  13: "https://tankionline.com/play/static/images/13.0ad436cb.webp",
+  14: "https://tankionline.com/play/static/images/14.fea62a90.webp",
+  15: "https://tankionline.com/play/static/images/15.09221118.webp",
+  16: "https://tankionline.com/play/static/images/16.3bbc8b10.webp",
+  17: "https://tankionline.com/play/static/images/17.ceb62c4c.webp",
+  18: "https://tankionline.com/play/static/images/18.1e5f0eb2.webp",
+  19: "https://tankionline.com/play/static/images/19.bc7f519b.webp",
+  20: "https://tankionline.com/play/static/images/20.8f2967f4.webp",
+  21: "https://tankionline.com/play/static/images/21.cef08a4f.webp",
+  22: "https://tankionline.com/play/static/images/22.02ac56c6.webp",
+  23: "https://tankionline.com/play/static/images/23.3c31b410.webp",
+  24: "https://tankionline.com/play/static/images/24.3244a43f.webp",
+  25: "https://tankionline.com/play/static/images/25.717ff925.webp",
+  26: "https://tankionline.com/play/static/images/26.128b1504.webp",
+  27: "https://tankionline.com/play/static/images/27.c8780824.webp",
+  28: "https://tankionline.com/play/static/images/28.17738a63.webp",
+  29: "https://tankionline.com/play/static/images/29.badfde30.webp",
+  30: "https://tankionline.com/play/static/images/30.399fde27.webp",
+  31: "https://tankionline.com/play/static/images/31.06d52fbe.webp"
+}
+
 var hidden = ['Splxff', /*'ISwissCheeseYoAhh'*/'OTF'];
 
 client.on('interactionCreate', async interaction => {
@@ -161,7 +195,7 @@ client.on('interactionCreate', async interaction => {
       var embed = new EmbedBuilder()
         .setTitle(`✅ ${foundData.uid} - Found`)
         .setColor(isOnline ? 0x00ff00 : 0xff0000)
-        .setThumbnail(ranks[foundData.rank]);
+        .setThumbnail(foundData.hasPremium ? premiumRanks[foundData.rank] : ranks[foundData.rank]);
       Object.entries(foundData).forEach(([key, value]) => {
         switch (key) {
           case 'onlineStatus':
@@ -193,7 +227,7 @@ client.on('interactionCreate', async interaction => {
       if (hidden.includes(foundData.uid)) {
         embed = new EmbedBuilder()
           .setTitle(`❌ ${foundData.uid} - Hidden`)
-          .setThumbnail(ranks[foundData.rank])
+          .setThumbnail(foundData.hasPremium ? premiumRanks[foundData.rank] : ranks[foundData.rank])
           .setColor("#ff0000")
           .setTimestamp();
       };
@@ -245,7 +279,7 @@ client.on('interactionCreate', async interaction => {
       var embed = new EmbedBuilder()
         .setTitle(`✅ ${foundData.uid} - Found`)
         .setColor(isOnline ? 0x00ff00 : 0xff0000)
-        .setThumbnail(ranks[foundData.rank]);
+        .setThumbnail(foundData.hasPremium ? premiumRanks[foundData.rank] : ranks[foundData.rank]);
       Object.entries(foundData).forEach(([key, value]) => {
         switch (key) {
           case 'onlineStatus':
@@ -277,7 +311,7 @@ client.on('interactionCreate', async interaction => {
       if (hidden.includes(foundData.uid)) {
         embed = new EmbedBuilder()
           .setTitle(`❌ ${foundData.uid} - Hidden`)
-          .setThumbnail(ranks[foundData.rank])
+          .setThumbnail(foundData.hasPremium ? premiumRanks[foundData.rank] : ranks[foundData.rank])
           .setColor("#ff0000")
           .setTimestamp();
       };
@@ -329,7 +363,7 @@ client.on('interactionCreate', async interaction => {
       var embed = new EmbedBuilder()
         .setTitle(`✅ ${foundData.uid} - Found`)
         .setColor(isOnline ? 0x00ff00 : 0xff0000)
-        .setThumbnail(ranks[foundData.rank]);
+        .setThumbnail(foundData.hasPremium ? premiumRanks[foundData.rank] : ranks[foundData.rank]);
       Object.entries(foundData).forEach(([key, value]) => {
         switch (key) {
           case 'onlineStatus':
@@ -361,7 +395,7 @@ client.on('interactionCreate', async interaction => {
       if (hidden.includes(foundData.uid)) {
         embed = new EmbedBuilder()
           .setTitle(`❌ ${foundData.uid} - Hidden`)
-          .setThumbnail(ranks[foundData.rank])
+          .setThumbnail(foundData.hasPremium ? premiumRanks[foundData.rank] : ranks[foundData.rank])
           .setColor("#ff0000")
           .setTimestamp();
       };
