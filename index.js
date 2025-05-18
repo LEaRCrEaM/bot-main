@@ -1023,6 +1023,44 @@ var page;
 })();
 
 const app = express();
+app.get("/api/player/:username", async (req, res) => {
+  if (!ready) return res.json({error: "wait 5 seconds and try again"});
+  res.set({
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET',
+    'Access-Control-Allow-Headers': 'Content-Type'
+  });
+  const name = req.params.username;
+  try {
+    for (let i = 0; i < 3; i++) {
+      setTimeout(() => {
+        SubscribeTo(name);
+      }, i * 1000);
+    };
+    let attempts = 0;
+    let maxAttempts = 30;
+    let interval = 1000;
+    let foundData = null;
+    while (attempts < maxAttempts) {
+      const data = await getMyData();
+      const match = data.find(t => t.uid.toLowerCase() === name.toLowerCase());
+      if (match) {
+        foundData = match;
+        break;
+      }
+      await new Promise(res => setTimeout(res, interval));
+      attempts++;
+    };
+    var data = await getMyData();
+    foundData = data.find(t => t.uid.toLowerCase() === name.toLowerCase()) || 'username not found';
+    if (!foundData) return res.status(404).json({ error: "User not found" });
+
+    return res.json(foundData);
+  } catch (err) {
+    console.error("Error fetching player data:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
 app.get('/', (req, res) => res.send('Bot is running!'));
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🌐 Web server running on port ${PORT}`));
