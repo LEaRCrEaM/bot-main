@@ -187,7 +187,7 @@ client.on('interactionCreate', async interaction => {
       const timeStr = date.toLocaleTimeString('en-US', { timeZone: 'America/New_York' });
       const lastOnline = `${formatDuration(seconds)} | ${dateStr} ${timeStr} (EST)`;
       var savedData;
-      await fetch('https://verdant-pollen-lamp.glitch.me/api/viewMessages')
+      await fetch('https://storage-msuf.onrender.com/api/viewMessages')
         .then(async r => await r.json())
         .then(async d => savedData = await d)
         .catch(async err => await console.error('Fetch error:', err));
@@ -271,7 +271,7 @@ client.on('interactionCreate', async interaction => {
       const hours = (seconds / 3600).toFixed(1);
       const lastOnline = `${hours} Hours Ago | ` + new Date(Date.now() - seconds * 1000).toLocaleTimeString('en-US', { timeZone: 'America/New_York' }) + ' (EST)';
       var savedData;
-      await fetch('https://verdant-pollen-lamp.glitch.me/api/viewMessages')
+      await fetch('https://storage-msuf.onrender.com/api/viewMessages')
         .then(async r => await r.json())
         .then(async d => savedData = await d)
         .catch(async err => await console.error('Fetch error:', err));
@@ -355,7 +355,7 @@ client.on('interactionCreate', async interaction => {
       const hours = (seconds / 3600).toFixed(1);
       const lastOnline = `${hours} Hours Ago | ` + new Date(Date.now() - seconds * 1000).toLocaleTimeString('en-US', { timeZone: 'America/New_York' }) + ' (EST)';
       var savedData;
-      await fetch('https://verdant-pollen-lamp.glitch.me/api/viewMessages')
+      await fetch('https://storage-msuf.onrender.com/api/viewMessages')
         .then(async r => await r.json())
         .then(async d => savedData = await d)
         .catch(async err => await console.error('Fetch error:', err));
@@ -432,7 +432,7 @@ client.on('messageCreate', async message => {
     };
     var commandParamsNum = message.content.replace('?getInfo ', '').split(' ').length - 1;
     var commandParams = message.content.replace('?getInfo ', '').split(' ');
-    await fetch('https://verdant-pollen-lamp.glitch.me/api/viewMessages')
+    await fetch('https://storage-msuf.onrender.com/api/viewMessages')
       .then(async r => {
         return await r.text();
       })
@@ -523,7 +523,7 @@ async function Subscribeto2(name) {
 };
 
 async function savePlayer(array) {
-  const ws = new WebSocket('wss://verdant-pollen-lamp.glitch.me', {
+  const ws = new WebSocket('wss://storage-msuf.onrender.com', {
     headers: {
       'User-Agent': 'Mozilla/5.0',
       'Origin': 'https://glitch.me'
@@ -709,7 +709,7 @@ async function saveAllPlayers() {
     var jsonStr = await JSON.stringify(array);
     var compressed = await pako.deflate(jsonStr);
     var base64 = await btoa(String.fromCharCode.apply(null, compressed));
-    const ws = new WebSocket('wss://verdant-pollen-lamp.glitch.me', {
+    const ws = new WebSocket('wss://storage-msuf.onrender.com', {
       headers: {
         'User-Agent': 'Mozilla/5.0',
         'Origin': 'https://glitch.me'
