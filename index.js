@@ -181,7 +181,7 @@ client.on('interactionCreate', async interaction => {
         };
         return parts.length ? `${parts.join(' ')} ago` : 'just now';
       };
-      const seconds = foundData.onlineStatus?.ok2_1?.m1_1;
+      const seconds = foundData.onlineStatus?.xk2_1?.m1_1;
       const date = new Date(Date.now() - seconds * 1000);
       const dateStr = date.toLocaleDateString('en-US', { timeZone: 'America/New_York', dateStyle: 'long' });
       const timeStr = date.toLocaleTimeString('en-US', { timeZone: 'America/New_York' });
@@ -267,7 +267,7 @@ client.on('interactionCreate', async interaction => {
     if ((typeof foundData == 'object') && foundData?.onlineStatus) {
       const isOnline = foundData.onlineStatus?.vk2_1;
       const serverNumber = foundData.onlineStatus?.wk2_1;
-      const seconds = foundData.onlineStatus?.ok2_1?.m1_1;
+      const seconds = foundData.onlineStatus?.xk2_1?.m1_1;
       const hours = (seconds / 3600).toFixed(1);
       const lastOnline = `${hours} Hours Ago | ` + new Date(Date.now() - seconds * 1000).toLocaleTimeString('en-US', { timeZone: 'America/New_York' }) + ' (EST)';
       var savedData;
@@ -351,7 +351,7 @@ client.on('interactionCreate', async interaction => {
     if ((typeof foundData == 'object') && foundData?.onlineStatus) {
       const isOnline = foundData.onlineStatus?.vk2_1;
       const serverNumber = foundData.onlineStatus?.wk2_1;
-      const seconds = foundData.onlineStatus?.ok2_1?.m1_1;
+      const seconds = foundData.onlineStatus?.xk2_1?.m1_1;
       const hours = (seconds / 3600).toFixed(1);
       const lastOnline = `${hours} Hours Ago | ` + new Date(Date.now() - seconds * 1000).toLocaleTimeString('en-US', { timeZone: 'America/New_York' }) + ' (EST)';
       var savedData;
